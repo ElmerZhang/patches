@@ -1,0 +1,18 @@
+diff --git a/db/db.cpp b/db/db.cpp
+index b1d1db8..be914ef 100644
+--- a/db/db.cpp
++++ b/db/db.cpp
+@@ -463,7 +463,12 @@ namespace mongo {
+             globalScriptEngine->setGetInterruptSpecCallback( jsGetInterruptSpecCallback );
+         }
+ 
+-        repairDatabasesAndCheckVersion();
++        /*************************** Modified by Elmer Zhang START *************************/
++        // check pdfile version only when forceRepai (--repair)
++        if ( forceRepair ) {
++            repairDatabasesAndCheckVersion();
++        }
++        /*************************** Modified by Elmer Zhang END ***************************/
+ 
+         /* we didn't want to pre-open all files for the repair check above. for regular
+            operation we do for read/write lock concurrency reasons.

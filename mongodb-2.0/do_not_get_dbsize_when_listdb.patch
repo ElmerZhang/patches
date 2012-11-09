@@ -1,0 +1,76 @@
+diff --git a/db/dbcommands.cpp b/db/dbcommands.cpp
+index b2e6218..6034213 100644
+--- a/db/dbcommands.cpp
++++ b/db/dbcommands.cpp
+@@ -991,10 +991,13 @@ namespace mongo {
+         virtual LockType locktype() const { return NONE; }
+         virtual void help( stringstream& help ) const { help << "list databases on this server"; }
+         CmdListDatabases() : Command("listDatabases" , true ) {}
++        /*************************** Modified by Elmer Zhang START *************************/
++        // add an option withSize to set whether to get the size of database, default to false
+         bool run(const string& dbname , BSONObj& jsobj, int, string& errmsg, BSONObjBuilder& result, bool /*fromRepl*/) {
+             vector< string > dbNames;
+             getDatabaseNames( dbNames );
+             vector< BSONObj > dbInfos;
++			bool withSize = jsobj["withSize"].trueValue();
+ 
+             set<string> seen;
+             boost::intmax_t totalSize = 0;
+@@ -1002,15 +1005,17 @@ namespace mongo {
+                 BSONObjBuilder b;
+                 b.append( "name", *i );
+ 
+-                boost::intmax_t size = dbSize( i->c_str() );
+-                b.append( "sizeOnDisk", (double) size );
+-                totalSize += size;
+-                
+-                {
+-                    readlock lk( *i );
+-                    Client::Context ctx( *i );
+-                    b.appendBool( "empty", ctx.db()->isEmpty() );
+-                }
++				if ( withSize ) {
++					boost::intmax_t size = dbSize( i->c_str() );
++					b.append( "sizeOnDisk", (double) size );
++					totalSize += size;
++
++					{
++						readlock lk( *i );
++						Client::Context ctx( *i );
++						b.appendBool( "empty", ctx.db()->isEmpty() );
++					}
++				}
+                 
+                 dbInfos.push_back( b.obj() );
+ 
+@@ -1032,13 +1037,16 @@ namespace mongo {
+ 
+                 BSONObjBuilder b;
+                 b.append( "name" , name );
+-                b.append( "sizeOnDisk" , (double)1.0 );
+ 
+-                {
+-                    readlock lk( name );
+-                    Client::Context ctx( name );
+-                    b.appendBool( "empty", ctx.db()->isEmpty() );
+-                }
++				if ( withSize ) {
++					b.append( "sizeOnDisk" , (double)1.0 );
++
++					{
++						readlock lk( name );
++						Client::Context ctx( name );
++						b.appendBool( "empty", ctx.db()->isEmpty() );
++					}
++				}
+ 
+                 dbInfos.push_back( b.obj() );
+             }
+@@ -1047,6 +1055,7 @@ namespace mongo {
+             result.append( "totalSize", double( totalSize ) );
+             return true;
+         }
++        /*************************** Modified by Elmer Zhang END ***************************/
+     } cmdListDatabases;
+ 
+     /* note an access to a database right after this will open it back up - so this is mainly

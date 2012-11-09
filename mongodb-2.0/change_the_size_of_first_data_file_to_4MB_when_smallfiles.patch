@@ -1,0 +1,31 @@
+diff --git a/db/pdfile.cpp b/db/pdfile.cpp
+index ac7731a..93bad2b 100644
+--- a/db/pdfile.cpp
++++ b/db/pdfile.cpp
+@@ -357,14 +357,21 @@ namespace mongo {
+ 
+     int MongoDataFile::defaultSize( const char *filename ) const {
+         int size;
+-        if ( fileNo <= 4 )
+-            size = (64*1024*1024) << fileNo;
+-        else
+-            size = 0x7ff00000;
++        /*************************** Modified by Elmer Zhang START *************************/
++        // let the size of data file start from 4MB when smallfiles = true
+         if ( cmdLine.smallfiles ) {
+-            size = size >> 2;
++            if ( fileNo <= 6 )
++                size = (4*1024*1024) << fileNo;
++            else
++                size = 0x7ff00000 >> 4;
++        } else {
++            if ( fileNo <= 4 )
++                size = (64*1024*1024) << fileNo;
++            else
++                size = 0x7ff00000;
+         }
+         return size;
++        /*************************** Modified by Elmer Zhang END ***************************/
+     }
+ 
+     void MongoDataFile::open( const char *filename, int minSize, bool preallocateOnly ) {

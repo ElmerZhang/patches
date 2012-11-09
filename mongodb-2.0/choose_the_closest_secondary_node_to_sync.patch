@@ -1,0 +1,41 @@
+diff --git a/db/repl/rs_initialsync.cpp b/db/repl/rs_initialsync.cpp
+index 112d739..d96a369 100644
+--- a/db/repl/rs_initialsync.cpp
++++ b/db/repl/rs_initialsync.cpp
+@@ -81,6 +81,7 @@ namespace mongo {
+ 
+     const Member* ReplSetImpl::getMemberToSyncTo() {
+         Member *closest = 0;
++        Member *primary = 0;	// Added By Elmer Zhang
+         bool buildIndexes = true;
+ 
+         // wait for 2N pings before choosing a sync target
+@@ -95,18 +96,25 @@ namespace mongo {
+             buildIndexes = myConfig().buildIndexes;
+         }
+ 
+-        // find the member with the lowest ping time that has more data than me
++        /*************************** Modified by Elmer Zhang START *************************/
++        // find the secondary with the lowest ping time that has more data than me
+         for (Member *m = _members.head(); m; m = m->next()) {
++            if (m->hbinfo().up() && (m->state() == MemberState::RS_PRIMARY)) {
++                primary = m;
++            }
+             if (m->hbinfo().up() &&
+                 // make sure members with buildIndexes sync from other members w/indexes
+                 (!buildIndexes || (buildIndexes && m->config().buildIndexes)) &&
+-                (m->state() == MemberState::RS_PRIMARY ||
+-                 (m->state() == MemberState::RS_SECONDARY && m->hbinfo().opTime > lastOpTimeWritten)) &&
++                (m->state() == MemberState::RS_SECONDARY && m->hbinfo().opTime > lastOpTimeWritten) &&
+                 (!closest || m->hbinfo().ping < closest->hbinfo().ping)) {
+                 closest = m;
+             }
+         }
+ 
++        // if there is no healthy secondary, set primary as closest
++        if (!closest) closest = primary;
++        /*************************** Modified by Elmer Zhang END ***************************/
++
+         {
+             lock lk(this);        
+ 
