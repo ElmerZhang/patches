@@ -1,0 +1,245 @@
+Index: sql/sql_prepare.cc
+===================================================================
+--- sql/sql_prepare.cc	(revision 17037)
++++ sql/sql_prepare.cc	(revision 17036)
+@@ -2240,9 +2240,9 @@
+     // Calculates the difference between the end and start times.
+     if (start_usecs && end_usecs >= start_usecs && !start_time_error && !end_time_error)
+     {
+-      thd->busy_time= end_usecs - start_usecs;
++      thd->busy_time= (end_usecs - start_usecs) / 1000000;
+       // In case there are bad values, 2629743 is the #seconds in a month.
+-      if (thd->busy_time > 2629743000000)
++      if (thd->busy_time > 2629743)
+       {
+         thd->busy_time= 0;
+       }
+@@ -2261,9 +2261,9 @@
+ #endif
+     if (start_cpu_nsecs && !cputime_error)
+     {
+-      thd->cpu_time= (end_cpu_nsecs - start_cpu_nsecs) / 1000;
++      thd->cpu_time= (end_cpu_nsecs - start_cpu_nsecs) / 1000000000;
+       // In case there are bad values, 2629743 is the #seconds in a month.
+-      if (thd->cpu_time > 2629743000000)
++      if (thd->cpu_time > 2629743)
+       {
+         thd->cpu_time= 0;
+       }
+@@ -2691,9 +2691,9 @@
+     // Calculates the difference between the end and start times.
+     if (start_usecs && end_usecs >= start_usecs && !start_time_error && !end_time_error)
+     {
+-      thd->busy_time= end_usecs - start_usecs;
++      thd->busy_time= (end_usecs - start_usecs) / 1000000;
+       // In case there are bad values, 2629743 is the #seconds in a month.
+-      if (thd->busy_time > 2629743000000)
++      if (thd->busy_time > 2629743)
+       {
+         thd->busy_time= 0;
+       }
+@@ -2712,9 +2712,9 @@
+ #endif
+     if (start_cpu_nsecs && !cputime_error)
+     {
+-      thd->cpu_time= (end_cpu_nsecs - start_cpu_nsecs) / 1000;
++      thd->cpu_time= (end_cpu_nsecs - start_cpu_nsecs) / 1000000000;
+       // In case there are bad values, 2629743 is the #seconds in a month.
+-      if (thd->cpu_time > 2629743000000)
++      if (thd->cpu_time > 2629743)
+       {
+         thd->cpu_time= 0;
+       }
+@@ -2867,9 +2867,9 @@
+     // Calculates the difference between the end and start times.
+     if (start_usecs && end_usecs >= start_usecs && !start_time_error && !end_time_error)
+     {
+-      thd->busy_time= end_usecs - start_usecs;
++      thd->busy_time= (end_usecs - start_usecs) / 1000000;
+       // In case there are bad values, 2629743 is the #seconds in a month.
+-      if (thd->busy_time > 2629743000000)
++      if (thd->busy_time > 2629743)
+       {
+         thd->busy_time= 0;
+       }
+@@ -2888,9 +2888,9 @@
+ #endif
+     if (start_cpu_nsecs && !cputime_error)
+     {
+-      thd->cpu_time= (end_cpu_nsecs - start_cpu_nsecs) / 1000;
++      thd->cpu_time= (end_cpu_nsecs - start_cpu_nsecs) / 1000000000;
+       // In case there are bad values, 2629743 is the #seconds in a month.
+-      if (thd->cpu_time > 2629743000000)
++      if (thd->cpu_time > 2629743)
+       {
+         thd->cpu_time= 0;
+       }
+@@ -2992,9 +2992,9 @@
+     // Calculates the difference between the end and start times.
+     if (start_usecs && end_usecs >= start_usecs && !start_time_error && !end_time_error)
+     {
+-      thd->busy_time= end_usecs - start_usecs;
++      thd->busy_time= (end_usecs - start_usecs) / 1000000;
+       // In case there are bad values, 2629743 is the #seconds in a month.
+-      if (thd->busy_time > 2629743000000)
++      if (thd->busy_time > 2629743)
+       {
+         thd->busy_time= 0;
+       }
+@@ -3013,9 +3013,9 @@
+ #endif
+     if (start_cpu_nsecs && !cputime_error)
+     {
+-      thd->cpu_time = (end_cpu_nsecs - start_cpu_nsecs) / 1000;
++      thd->cpu_time = (end_cpu_nsecs - start_cpu_nsecs) / 1000000000;
+       // In case there are bad values, 2629743 is the #seconds in a month.
+-      if (thd->cpu_time > 2629743000000)
++      if (thd->cpu_time > 2629743)
+       {
+         thd->cpu_time= 0;
+       }
+Index: sql/sql_show.cc
+===================================================================
+--- sql/sql_show.cc	(revision 17037)
++++ sql/sql_show.cc	(revision 17036)
+@@ -8062,22 +8062,22 @@
+ ST_FIELD_INFO user_stats_fields_info[]=
+ {
+   {"USER", USERNAME_LENGTH, MYSQL_TYPE_STRING, 0, 0, "User", SKIP_OPEN_TABLE},
+-  {"TOTAL_CONNECTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Total_connections", SKIP_OPEN_TABLE},
++  {"TOTAL_CONNECTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Total_connections", SKIP_OPEN_TABLE},
+   {"CONCURRENT_CONNECTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Concurrent_connections", SKIP_OPEN_TABLE},
+   {"CONNECTED_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Connected_time", SKIP_OPEN_TABLE},
+-  {"BUSY_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Busy_time", SKIP_OPEN_TABLE},
+-  {"CPU_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Cpu_time", SKIP_OPEN_TABLE},
+-  {"BYTES_RECEIVED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Bytes_received", SKIP_OPEN_TABLE},
+-  {"BYTES_SENT", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Bytes_sent", SKIP_OPEN_TABLE},
+-  {"BINLOG_BYTES_WRITTEN", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Binlog_bytes_written", SKIP_OPEN_TABLE},
+-  {"ROWS_FETCHED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Rows_fetched", SKIP_OPEN_TABLE},
+-  {"ROWS_UPDATED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Rows_updated", SKIP_OPEN_TABLE},
+-  {"TABLE_ROWS_READ", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Table_rows_read", SKIP_OPEN_TABLE},
+-  {"SELECT_COMMANDS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Select_commands", SKIP_OPEN_TABLE},
+-  {"UPDATE_COMMANDS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Update_commands", SKIP_OPEN_TABLE},
+-  {"OTHER_COMMANDS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Other_commands", SKIP_OPEN_TABLE},
+-  {"COMMIT_TRANSACTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Commit_transactions", SKIP_OPEN_TABLE},
+-  {"ROLLBACK_TRANSACTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Rollback_transactions", SKIP_OPEN_TABLE},
++  {"BUSY_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Busy_time", SKIP_OPEN_TABLE},
++  {"CPU_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Cpu_time", SKIP_OPEN_TABLE},
++  {"BYTES_RECEIVED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Bytes_received", SKIP_OPEN_TABLE},
++  {"BYTES_SENT", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Bytes_sent", SKIP_OPEN_TABLE},
++  {"BINLOG_BYTES_WRITTEN", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Binlog_bytes_written", SKIP_OPEN_TABLE},
++  {"ROWS_FETCHED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Rows_fetched", SKIP_OPEN_TABLE},
++  {"ROWS_UPDATED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Rows_updated", SKIP_OPEN_TABLE},
++  {"TABLE_ROWS_READ", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Table_rows_read", SKIP_OPEN_TABLE},
++  {"SELECT_COMMANDS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Select_commands", SKIP_OPEN_TABLE},
++  {"UPDATE_COMMANDS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Update_commands", SKIP_OPEN_TABLE},
++  {"OTHER_COMMANDS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Other_commands", SKIP_OPEN_TABLE},
++  {"COMMIT_TRANSACTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Commit_transactions", SKIP_OPEN_TABLE},
++  {"ROLLBACK_TRANSACTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Rollback_transactions", SKIP_OPEN_TABLE},
+   {"DENIED_CONNECTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Denied_connections", SKIP_OPEN_TABLE},
+   {"LOST_CONNECTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Lost_connections", SKIP_OPEN_TABLE},
+   {"ACCESS_DENIED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Access_denied", SKIP_OPEN_TABLE},
+@@ -8088,22 +8088,22 @@
+ ST_FIELD_INFO client_stats_fields_info[]=
+ {
+   {"CLIENT", LIST_PROCESS_HOST_LEN, MYSQL_TYPE_STRING, 0, 0, "Client", SKIP_OPEN_TABLE},
+-  {"TOTAL_CONNECTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Total_connections", SKIP_OPEN_TABLE},
++  {"TOTAL_CONNECTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Total_connections", SKIP_OPEN_TABLE},
+   {"CONCURRENT_CONNECTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Concurrent_connections", SKIP_OPEN_TABLE},
+   {"CONNECTED_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Connected_time", SKIP_OPEN_TABLE},
+-  {"BUSY_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Busy_time", SKIP_OPEN_TABLE},
+-  {"CPU_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Cpu_time", SKIP_OPEN_TABLE},
+-  {"BYTES_RECEIVED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Bytes_received", SKIP_OPEN_TABLE},
+-  {"BYTES_SENT", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Bytes_sent", SKIP_OPEN_TABLE},
+-  {"BINLOG_BYTES_WRITTEN", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Binlog_bytes_written", SKIP_OPEN_TABLE},
+-  {"ROWS_FETCHED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Rows_fetched", SKIP_OPEN_TABLE},
+-  {"ROWS_UPDATED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Rows_updated", SKIP_OPEN_TABLE},
+-  {"TABLE_ROWS_READ", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Table_rows_read", SKIP_OPEN_TABLE},
+-  {"SELECT_COMMANDS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Select_commands", SKIP_OPEN_TABLE},
+-  {"UPDATE_COMMANDS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Update_commands", SKIP_OPEN_TABLE},
+-  {"OTHER_COMMANDS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Other_commands", SKIP_OPEN_TABLE},
+-  {"COMMIT_TRANSACTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Commit_transactions", SKIP_OPEN_TABLE},
+-  {"ROLLBACK_TRANSACTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Rollback_transactions", SKIP_OPEN_TABLE},
++  {"BUSY_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Busy_time", SKIP_OPEN_TABLE},
++  {"CPU_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Cpu_time", SKIP_OPEN_TABLE},
++  {"BYTES_RECEIVED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Bytes_received", SKIP_OPEN_TABLE},
++  {"BYTES_SENT", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Bytes_sent", SKIP_OPEN_TABLE},
++  {"BINLOG_BYTES_WRITTEN", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Binlog_bytes_written", SKIP_OPEN_TABLE},
++  {"ROWS_FETCHED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Rows_fetched", SKIP_OPEN_TABLE},
++  {"ROWS_UPDATED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Rows_updated", SKIP_OPEN_TABLE},
++  {"TABLE_ROWS_READ", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Table_rows_read", SKIP_OPEN_TABLE},
++  {"SELECT_COMMANDS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Select_commands", SKIP_OPEN_TABLE},
++  {"UPDATE_COMMANDS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Update_commands", SKIP_OPEN_TABLE},
++  {"OTHER_COMMANDS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Other_commands", SKIP_OPEN_TABLE},
++  {"COMMIT_TRANSACTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Commit_transactions", SKIP_OPEN_TABLE},
++  {"ROLLBACK_TRANSACTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Rollback_transactions", SKIP_OPEN_TABLE},
+   {"DENIED_CONNECTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Denied_connections", SKIP_OPEN_TABLE},
+   {"LOST_CONNECTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Lost_connections", SKIP_OPEN_TABLE},
+   {"ACCESS_DENIED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Access_denied", SKIP_OPEN_TABLE},
+@@ -8117,11 +8117,11 @@
+   {"TOTAL_CONNECTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Total_connections", SKIP_OPEN_TABLE},
+   {"CONCURRENT_CONNECTIONS", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Concurrent_connections", SKIP_OPEN_TABLE},
+   {"CONNECTED_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Connected_time", SKIP_OPEN_TABLE},
+-  {"BUSY_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Busy_time", SKIP_OPEN_TABLE},
+-  {"CPU_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Cpu_time", SKIP_OPEN_TABLE},
+-  {"BYTES_RECEIVED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Bytes_received", SKIP_OPEN_TABLE},
+-  {"BYTES_SENT", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Bytes_sent", SKIP_OPEN_TABLE},
+-  {"BINLOG_BYTES_WRITTEN", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Binlog_bytes_written", SKIP_OPEN_TABLE},
++  {"BUSY_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Busy_time", SKIP_OPEN_TABLE},
++  {"CPU_TIME", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Cpu_time", SKIP_OPEN_TABLE},
++  {"BYTES_RECEIVED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Bytes_received", SKIP_OPEN_TABLE},
++  {"BYTES_SENT", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Bytes_sent", SKIP_OPEN_TABLE},
++  {"BINLOG_BYTES_WRITTEN", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Binlog_bytes_written", SKIP_OPEN_TABLE},
+   {"ROWS_FETCHED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Rows_fetched", SKIP_OPEN_TABLE},
+   {"ROWS_UPDATED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Rows_updated", SKIP_OPEN_TABLE},
+   {"TABLE_ROWS_READ", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Table_rows_read", SKIP_OPEN_TABLE},
+@@ -8141,9 +8141,9 @@
+ {
+   {"TABLE_SCHEMA", NAME_LEN, MYSQL_TYPE_STRING, 0, 0, "Table_schema", SKIP_OPEN_TABLE},
+   {"TABLE_NAME", NAME_LEN, MYSQL_TYPE_STRING, 0, 0, "Table_name", SKIP_OPEN_TABLE},
+-  {"ROWS_READ", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Rows_read", SKIP_OPEN_TABLE},
+-  {"ROWS_CHANGED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Rows_changed", SKIP_OPEN_TABLE},
+-  {"ROWS_CHANGED_X_INDEXES", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Rows_changed_x_#indexes", SKIP_OPEN_TABLE},
++  {"ROWS_READ", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Rows_read", SKIP_OPEN_TABLE},
++  {"ROWS_CHANGED", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Rows_changed", SKIP_OPEN_TABLE},
++  {"ROWS_CHANGED_X_INDEXES", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Rows_changed_x_#indexes", SKIP_OPEN_TABLE},
+   {0, 0, MYSQL_TYPE_STRING, 0, 0, 0, 0}
+ };
+ 
+@@ -8152,7 +8152,7 @@
+   {"TABLE_SCHEMA", NAME_LEN, MYSQL_TYPE_STRING, 0, 0, "Table_schema", SKIP_OPEN_TABLE},
+   {"TABLE_NAME", NAME_LEN, MYSQL_TYPE_STRING, 0, 0, "Table_name", SKIP_OPEN_TABLE},
+   {"INDEX_NAME", NAME_LEN, MYSQL_TYPE_STRING, 0, 0, "Index_name", SKIP_OPEN_TABLE},
+-  {"ROWS_READ", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONGLONG, 0, 0, "Rows_read", SKIP_OPEN_TABLE},
++  {"ROWS_READ", MY_INT64_NUM_DECIMAL_DIGITS, MYSQL_TYPE_LONG, 0, 0, "Rows_read", SKIP_OPEN_TABLE},
+   {0, 0, MYSQL_TYPE_STRING, 0, 0, 0, 0}
+ };
+ 
+Index: sql/sql_parse.cc
+===================================================================
+--- sql/sql_parse.cc	(revision 17037)
++++ sql/sql_parse.cc	(revision 17036)
+@@ -5833,9 +5833,9 @@
+     // Calculates the difference between the end and start times.
+     if (start_usecs && end_usecs >= start_usecs && !start_time_error && !end_time_error)
+     {
+-      thd->busy_time= end_usecs - start_usecs;
++      thd->busy_time= (end_usecs - start_usecs) / 1000000;
+       // In case there are bad values, 2629743 is the #seconds in a month.
+-      if (thd->busy_time > 2629743000000)
++      if (thd->busy_time > 2629743)
+       {
+         thd->busy_time= 0;
+       }
+@@ -5854,9 +5854,9 @@
+ #endif
+     if (start_cpu_nsecs && !cputime_error)
+     {
+-      thd->cpu_time = (end_cpu_nsecs - start_cpu_nsecs) / 1000;
++      thd->cpu_time = (end_cpu_nsecs - start_cpu_nsecs) / 1000000000;
+       // In case there are bad values, 2629743 is the #seconds in a month.
+-      if (thd->cpu_time > 2629743000000)
++      if (thd->cpu_time > 2629743)
+       {
+         thd->cpu_time = 0;
+       }

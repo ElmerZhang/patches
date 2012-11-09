@@ -1,0 +1,44 @@
+Index: sql/log.cc
+===================================================================
+--- sql/log.cc	(revision 17039)
++++ sql/log.cc	(revision 17038)
+@@ -786,33 +786,13 @@
+     t.neg= 0;
+ 
+     /* fill in query_time field */
+-    if (table->field[2]->type() == MYSQL_TYPE_TIME) {
+-      calc_time_from_sec(&t, (long) min(query_time, (longlong) TIME_MAX_VALUE_SECONDS), 0);
+-      if (table->field[2]->store_time(&t, MYSQL_TIMESTAMP_TIME))
+-        goto err;
+-    }
+-    if (table->field[2]->type() == MYSQL_TYPE_FLOAT || table->field[2]->type() == MYSQL_TYPE_DOUBLE) {
+-      if (table->field[2]->store((double) ulonglong2double(query_utime)/1000000.0))
+-        goto err;
+-    }
+-    if (table->field[2]->type() == MYSQL_TYPE_LONG || table->field[2]->type() == MYSQL_TYPE_LONGLONG) {
+-      if (table->field[2]->store((longlong) query_utime, TRUE))
+-        goto err;
+-    }
++    calc_time_from_sec(&t, (long) min(query_time, (longlong) TIME_MAX_VALUE_SECONDS), 0);
++    if (table->field[2]->store_time(&t, MYSQL_TIMESTAMP_TIME))
++      goto err;
+     /* lock_time */
+-    if (table->field[3]->type() == MYSQL_TYPE_TIME) {
+-      calc_time_from_sec(&t, (long) min(lock_time, (longlong) TIME_MAX_VALUE_SECONDS), 0);
+-      if (table->field[3]->store_time(&t, MYSQL_TIMESTAMP_TIME))
+-        goto err;
+-    }
+-    if (table->field[3]->type() == MYSQL_TYPE_FLOAT || table->field[3]->type() == MYSQL_TYPE_DOUBLE) {
+-      if (table->field[3]->store((double) ulonglong2double(lock_utime)/1000000.0))
+-        goto err;
+-    }
+-    if (table->field[3]->type() == MYSQL_TYPE_LONG || table->field[3]->type() == MYSQL_TYPE_LONGLONG) {
+-      if (table->field[3]->store((longlong) lock_utime, TRUE))
+-        goto err;
+-    }
++    calc_time_from_sec(&t, (long) min(lock_time, (longlong) TIME_MAX_VALUE_SECONDS), 0);
++    if (table->field[3]->store_time(&t, MYSQL_TIMESTAMP_TIME))
++      goto err;
+     /* rows_sent */
+     if (table->field[4]->store((longlong) thd->sent_row_count, TRUE))
+       goto err;

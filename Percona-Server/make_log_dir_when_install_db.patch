@@ -1,0 +1,23 @@
+Index: scripts/mysql_install_db.sh
+===================================================================
+--- scripts/mysql_install_db.sh	(revision 17035)
++++ scripts/mysql_install_db.sh	(revision 17034)
+@@ -108,9 +108,6 @@
+       --builddir=*) builddir=`parse_arg "$arg"` ;;
+       --srcdir=*)  srcdir=`parse_arg "$arg"` ;;
+       --ldata=*|--datadir=*) ldata=`parse_arg "$arg"` ;;
+-      --log-bin=*) binlog=`parse_arg "$arg"` ;;
+-      --relay-log=*) relaylog=`parse_arg "$arg"` ;;
+-      --slow-query-log-file=*) slowlog=`parse_arg "$arg"` ;;
+       --user=*)
+         # Note that the user will be passed to mysqld so that it runs
+         # as 'user' (crucial e.g. if log-bin=/some_other_path/
+@@ -359,7 +356,7 @@
+ fi
+ 
+ # Create database directories
+-for dir in $ldata $ldata/mysql $ldata/test `dirname $binlog` `dirname $relaylog` `dirname $slowlog`
++for dir in $ldata $ldata/mysql $ldata/test
+ do
+   if test ! -d $dir
+   then
